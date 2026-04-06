@@ -51,13 +51,6 @@ static rserr_t	GLW_SetMode( int mode,
 static qboolean s_classRegistered = qfalse;
 
 //
-// function declaration
-//
-void	 QGL_EnableLogging( qboolean enable );
-qboolean QGL_Init( const char *dllname );
-void     QGL_Shutdown( void );
-
-//
 // variable declarations
 //
 glwstate_t glw_state;
@@ -371,7 +364,7 @@ static int GLW_MakeContext( PIXELFORMATDESCRIPTOR *pPFD )
 	if ( !glw_state.hGLRC )
 	{
 		ri.Printf( PRINT_ALL, "...creating GL context: " );
-		if ( ( glw_state.hGLRC = qwglCreateContext( glw_state.hDC ) ) == 0 )
+		if ( ( glw_state.hGLRC = (HGLRC)wglCreateContext( glw_state.hDC ) ) == 0 )
 		{
 			ri.Printf (PRINT_ALL, "failed\n");
 
@@ -380,9 +373,9 @@ static int GLW_MakeContext( PIXELFORMATDESCRIPTOR *pPFD )
 		ri.Printf( PRINT_ALL, "succeeded\n" );
 
 		ri.Printf( PRINT_ALL, "...making context current: " );
-		if ( !qwglMakeCurrent( glw_state.hDC, glw_state.hGLRC ) )
+		if ( !wglMakeCurrent( glw_state.hDC, glw_state.hGLRC ) )
 		{
-			qwglDeleteContext( glw_state.hGLRC );
+			wglDeleteContext( glw_state.hGLRC );
 			glw_state.hGLRC = NULL;
 			ri.Printf (PRINT_ALL, "failed\n");
 			return TRY_PFD_FAIL_HARD;
@@ -1100,33 +1093,15 @@ static void GLW_InitExtensions( void )
 		ri.Printf( PRINT_ALL, "...Using GL_EXT_texture_edge_clamp\n" );
 	}
 
-	// WGL_EXT_swap_control
-	qwglSwapIntervalEXT = ( BOOL (WINAPI *)(int)) qwglGetProcAddress( "wglSwapIntervalEXT" );
-	if ( qwglSwapIntervalEXT )
-	{
-		ri.Printf( PRINT_ALL, "...using WGL_EXT_swap_control\n" );
-		r_swapInterval->modified = qtrue;	// force a set next frame
-	}
-	else
-	{
-		ri.Printf( PRINT_ALL, "...WGL_EXT_swap_control not found\n" );
-	}
 
 	// GL_ARB_multitexture
-	qglMultiTexCoord2fARB = NULL;
-	qglActiveTextureARB = NULL;
-	qglClientActiveTextureARB = NULL;
 	if ( strstr( glConfig.extensions_string, "GL_ARB_multitexture" )  )
 	{
 		if ( r_ext_multitexture->integer )
 		{
-			qglMultiTexCoord2fARB = ( PFNGLMULTITEXCOORD2FARBPROC ) qwglGetProcAddress( "glMultiTexCoord2fARB" );
-			qglActiveTextureARB = ( PFNGLACTIVETEXTUREARBPROC ) qwglGetProcAddress( "glActiveTextureARB" );
-			qglClientActiveTextureARB = ( PFNGLCLIENTACTIVETEXTUREARBPROC ) qwglGetProcAddress( "glClientActiveTextureARB" );
-
-			if ( qglActiveTextureARB )
+			if ( glActiveTextureARB )
 			{
-				qglGetIntegerv( GL_MAX_ACTIVE_TEXTURES_ARB, &glConfig.maxActiveTextures );
+				glGetIntegerv( GL_MAX_ACTIVE_TEXTURES_ARB, &glConfig.maxActiveTextures );
 
 				if ( glConfig.maxActiveTextures > 1 )
 				{
@@ -1134,9 +1109,6 @@ static void GLW_InitExtensions( void )
 				}
 				else
 				{
-					qglMultiTexCoord2fARB = NULL;
-					qglActiveTextureARB = NULL;
-					qglClientActiveTextureARB = NULL;
 					ri.Printf( PRINT_ALL, "...not using GL_ARB_multitexture, < 2 texture units\n" );
 				}
 			}
@@ -1152,18 +1124,11 @@ static void GLW_InitExtensions( void )
 	}
 
 	// GL_EXT_compiled_vertex_array
-	qglLockArraysEXT = NULL;
-	qglUnlockArraysEXT = NULL;
 	if ( strstr( glConfig.extensions_string, "GL_EXT_compiled_vertex_array" ) )
 	{
 		if ( r_ext_compiled_vertex_array->integer )
 		{
 			ri.Printf( PRINT_ALL, "...using GL_EXT_compiled_vertex_array\n" );
-			qglLockArraysEXT = ( void ( APIENTRY * )( int, int ) ) qwglGetProcAddress( "glLockArraysEXT" );
-			qglUnlockArraysEXT = ( void ( APIENTRY * )( void ) ) qwglGetProcAddress( "glUnlockArraysEXT" );
-			if (!qglLockArraysEXT || !qglUnlockArraysEXT) {
-				ri.Error (ERR_FATAL, "bad getprocaddress");
-			}
 		}
 		else
 		{
@@ -1174,17 +1139,12 @@ static void GLW_InitExtensions( void )
 	{
 		ri.Printf( PRINT_ALL, "...GL_EXT_compiled_vertex_array not found\n" );
 	}
-
-	qglPointParameterfEXT = NULL;
-	qglPointParameterfvEXT = NULL;
 	if ( strstr( glConfig.extensions_string, "GL_EXT_point_parameters" ) )
 	{
 		if ( r_ext_compiled_vertex_array->integer || 1)
 		{
 			ri.Printf( PRINT_ALL, "...using GL_EXT_point_parameters\n" );
-			qglPointParameterfEXT = ( void ( APIENTRY * )( GLenum, GLfloat) ) qwglGetProcAddress( "glPointParameterfEXT" );
-			qglPointParameterfvEXT = ( void ( APIENTRY * )( GLenum, GLfloat *) ) qwglGetProcAddress( "glPointParameterfvEXT" );
-			if (!qglPointParameterfEXT || !qglPointParameterfvEXT) 
+			if (!glPointParameterfEXT || !glPointParameterfvEXT) 
 			{
 				ri.Error (ERR_FATAL, "bad getprocaddress");
 			}
@@ -1201,7 +1161,7 @@ static void GLW_InitExtensions( void )
 
 #ifdef _NPATCH
 	// GL_ATI_pn_triangles
-	qglPNTrianglesiATI = NULL;
+	glPNTrianglesiATI = NULL;
 	r_ATI_NPATCH_available = ri.Cvar_Get( "r_ATI_NPATCH_available", "0",CVAR_ROM );
 /*	if ( strstr( glConfig.extensions_string, "GL_ATI_pn_triangles" ) )
 	{
@@ -1209,8 +1169,8 @@ static void GLW_InitExtensions( void )
 		if ( r_ati_pn_triangles->integer )
 		{	
 			ri.Printf( PRINT_ALL, "...using GL_ATI_pn_triangles\n" );
-			qglPNTrianglesiATI = ( void ( APIENTRY * )( GLenum, GLint ) ) qwglGetProcAddress( "glPNTrianglesiATI" );
-			if (!qglPNTrianglesiATI) {
+			glPNTrianglesiATI = ( void ( APIENTRY * )( GLenum, GLint ) ) wglGetProcAddress( "glPNTrianglesiATI" );
+			if (!glPNTrianglesiATI) {
 				ri.Error (ERR_FATAL, "bad getprocaddress");
 			}
 		}
@@ -1286,7 +1246,6 @@ static qboolean GLW_LoadOpenGL()
 	//
 	// load the driver and bind our function pointers to it
 	// 
-	if ( QGL_Init( buffer ) ) 
 	{
 		cdsFullscreen = r_fullscreen->integer;
 
@@ -1309,7 +1268,7 @@ static qboolean GLW_LoadOpenGL()
 	}
 fail:
 
-	QGL_Shutdown();
+	//QGL_Shutdown();
 
 	return qfalse;
 }
@@ -1326,8 +1285,8 @@ void GLimp_EndFrame (void)
 		r_swapInterval->modified = qfalse;
 
 		if ( !glConfig.stereoEnabled ) {	// why?
-			if ( qwglSwapIntervalEXT ) {
-				qwglSwapIntervalEXT( r_swapInterval->integer );
+			if ( wglSwapIntervalEXT ) {
+				wglSwapIntervalEXT( r_swapInterval->integer );
 			}
 		}
 	}
@@ -1340,7 +1299,7 @@ void GLimp_EndFrame (void)
 	}
 
 	// check logging
-	QGL_EnableLogging( r_logFile->integer );
+	//QGL_EnableLogging( r_logFile->integer );
 }
 
 static void GLW_StartOpenGL( void )
@@ -1393,10 +1352,10 @@ void GLimp_Init( void )
 	GLW_StartOpenGL();
 
 	// get our config strings
-	glConfig.vendor_string = (const char *) qglGetString (GL_VENDOR);
-	glConfig.renderer_string = (const char *) qglGetString (GL_RENDERER);
-	glConfig.version_string = (const char *) qglGetString (GL_VERSION);
-	glConfig.extensions_string = (const char *) qglGetString (GL_EXTENSIONS);
+	glConfig.vendor_string = (const char *) glGetString (GL_VENDOR);
+	glConfig.renderer_string = (const char *) glGetString (GL_RENDERER);
+	glConfig.version_string = (const char *) glGetString (GL_VERSION);
+	glConfig.extensions_string = (const char *) glGetString (GL_EXTENSIONS);
 	
 	if (!glConfig.vendor_string || !glConfig.renderer_string || !glConfig.version_string || !glConfig.extensions_string)
 	{
@@ -1404,7 +1363,7 @@ void GLimp_Init( void )
 	}
 
 	// OpenGL driver constants
-	qglGetIntegerv( GL_MAX_TEXTURE_SIZE, &glConfig.maxTextureSize );
+	glGetIntegerv( GL_MAX_TEXTURE_SIZE, &glConfig.maxTextureSize );
 	// stubbed or broken drivers may have reported 0...
 	if ( glConfig.maxTextureSize <= 0 ) 
 	{
@@ -1486,7 +1445,7 @@ void GLimp_Shutdown( void )
 	int retVal;
 
 	// FIXME: Brian, we need better fallbacks from partially initialized failures
-	if ( !qwglMakeCurrent ) {
+	if ( !wglMakeCurrent ) {
 		return;
 	}
 
@@ -1496,9 +1455,9 @@ void GLimp_Shutdown( void )
 	WG_RestoreGamma();
 
 	// set current context to NULL
-	if ( qwglMakeCurrent )
+	if ( wglMakeCurrent )
 	{
-		retVal = qwglMakeCurrent( NULL, NULL ) != 0;
+		retVal = wglMakeCurrent( NULL, NULL ) != 0;
 
 		ri.Printf( PRINT_ALL, "...wglMakeCurrent( NULL, NULL ): %s\n", success[retVal] );
 	}
@@ -1506,7 +1465,7 @@ void GLimp_Shutdown( void )
 	// delete HGLRC
 	if ( glw_state.hGLRC )
 	{
-		retVal = qwglDeleteContext( glw_state.hGLRC ) != 0;
+		retVal = wglDeleteContext( glw_state.hGLRC ) != 0;
 		ri.Printf( PRINT_ALL, "...deleting GL context: %s\n", success[retVal] );
 		glw_state.hGLRC = NULL;
 	}
@@ -1545,7 +1504,7 @@ void GLimp_Shutdown( void )
 	}
 
 	// shutdown QGL subsystem
-	QGL_Shutdown();
+	//QGL_Shutdown();
 
 	memset( &glConfig, 0, sizeof( glConfig ) );
 	memset( &glState, 0, sizeof( glState ) );
@@ -1580,7 +1539,7 @@ void GLimp_RenderThreadWrapper( void ) {
 	glimpRenderThread();
 
 	// unbind the context before we die
-	qwglMakeCurrent( glw_state.hDC, NULL );
+	wglMakeCurrent( glw_state.hDC, NULL );
 }
 
 /*
@@ -1619,7 +1578,7 @@ static	int		wglErrors;
 void *GLimp_RendererSleep( void ) {
 	void	*data;
 
-	if ( !qwglMakeCurrent( glw_state.hDC, NULL ) ) {
+	if ( !wglMakeCurrent( glw_state.hDC, NULL ) ) {
 		wglErrors++;
 	}
 
@@ -1630,7 +1589,7 @@ void *GLimp_RendererSleep( void ) {
 
 	WaitForSingleObject( renderCommandsEvent, INFINITE );
 
-	if ( !qwglMakeCurrent( glw_state.hDC, glw_state.hGLRC ) ) {
+	if ( !wglMakeCurrent( glw_state.hDC, glw_state.hGLRC ) ) {
 		wglErrors++;
 	}
 
@@ -1649,7 +1608,7 @@ void *GLimp_RendererSleep( void ) {
 void GLimp_FrontEndSleep( void ) {
 	WaitForSingleObject( renderCompletedEvent, INFINITE );
 
-	if ( !qwglMakeCurrent( glw_state.hDC, glw_state.hGLRC ) ) {
+	if ( !wglMakeCurrent( glw_state.hDC, glw_state.hGLRC ) ) {
 		wglErrors++;
 	}
 }
@@ -1658,7 +1617,7 @@ void GLimp_FrontEndSleep( void ) {
 void GLimp_WakeRenderer( void *data ) {
 	smpData = data;
 
-	if ( !qwglMakeCurrent( glw_state.hDC, NULL ) ) {
+	if ( !wglMakeCurrent( glw_state.hDC, NULL ) ) {
 		wglErrors++;
 	}
 

@@ -6,7 +6,7 @@
 #include "../qcommon/qfiles.h"
 #include "tr_public.h"
 #include "mdx_format.h"
-#include "qgl.h"
+#include "../opengl/opengl.h"
 #include "glext.h"
 
 #define GL_INDEX_TYPE		GL_UNSIGNED_INT

@@ -121,14 +121,14 @@ void GL_TextureMode( const char *string ) {
 	{
 		if ( glt->mipmap ) {
 			GL_Bind (glt);
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 
 			if(glConfig.textureFilterAnisotropicAvailable) {
 				if(r_ext_texture_filter_anisotropic->integer) {
-					qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 2.0f);
+					glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 2.0f);
 				} else {
-					qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
+					glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 1.0f);
 				}
 			}
 		}
@@ -659,13 +659,13 @@ static void Upload32( unsigned *data,
 	// copy or resample data as appropriate for first MIP level
 	if (!mipmap)
 	{
-		qglTexImage2D (GL_TEXTURE_2D, 0, *pformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D (GL_TEXTURE_2D, 0, *pformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		goto done;
 	}
 
 	R_LightScaleTexture (data, width, height, !mipmap );
 
-	qglTexImage2D (GL_TEXTURE_2D, 0, *pformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+	glTexImage2D (GL_TEXTURE_2D, 0, *pformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
 
 	if (mipmap)
 	{
@@ -688,23 +688,23 @@ static void Upload32( unsigned *data,
 				R_BlendOverTexture( (byte *)data, width * height, mipBlendColors[miplevel] );
 			}
 
-			qglTexImage2D (GL_TEXTURE_2D, miplevel, *pformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+			glTexImage2D (GL_TEXTURE_2D, miplevel, *pformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
 		}
 	}
 done:
 
 	if (mipmap)
 	{
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, gl_filter_min);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, gl_filter_max);
 		if(r_ext_texture_filter_anisotropic->integer && glConfig.textureFilterAnisotropicAvailable) {
-			qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 2.0f);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 2.0f);
 		}
 	}
 	else
 	{
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	}
 
 	GL_CheckErrors();
@@ -748,7 +748,7 @@ static void R_Images_DeleteImageContents( image_t *pImage )
 	assert(pImage);	// should never be called with NULL
 	if (pImage)
 	{
-		qglDeleteTextures( 1, &pImage->texnum );
+		glDeleteTextures( 1, &pImage->texnum );
 		ri.Free(pImage);
 	}
 }
@@ -756,18 +756,18 @@ static void R_Images_DeleteImageContents( image_t *pImage )
 static void GL_ResetBinds(void)
 {
 	memset( glState.currenttextures, 0, sizeof( glState.currenttextures ) );
-	if ( qglBindTexture ) 
+	if ( glBindTexture ) 
 	{
-		if ( qglActiveTextureARB ) 
+		if ( glActiveTextureARB ) 
 		{
 			GL_SelectTexture( 1 );
-			qglBindTexture( GL_TEXTURE_2D, 0 );
+			glBindTexture( GL_TEXTURE_2D, 0 );
 			GL_SelectTexture( 0 );
-			qglBindTexture( GL_TEXTURE_2D, 0 );
+			glBindTexture( GL_TEXTURE_2D, 0 );
 		} 
 		else 
 		{
-			qglBindTexture( GL_TEXTURE_2D, 0 );
+			glBindTexture( GL_TEXTURE_2D, 0 );
 		}
 	}
 }
@@ -969,6 +969,8 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 	image_t		*image;
 	qboolean	isLightmap = qfalse;
 
+	mipmap = qfalse;
+
 	if (strlen(name) >= MAX_QPATH ) {
 		ri.Error (ERR_DROP, "R_CreateImage: \"%s\" is too long\n", name);
 	}
@@ -1016,13 +1018,13 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 	image->wrapClampMode = glWrapClampMode;
 
 	// lightmaps are always allocated on TMU 1
-	if ( qglActiveTextureARB && isLightmap ) {
+	if ( glActiveTextureARB && isLightmap ) {
 		image->TMU = 1;
 	} else {
 		image->TMU = 0;
 	}
 
-	if ( qglActiveTextureARB ) {
+	if ( glActiveTextureARB ) {
 		GL_SelectTexture( image->TMU );
 	}
 
@@ -1037,10 +1039,10 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 								&image->uploadWidth,
 								&image->uploadHeight );
 
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapClampMode );
-	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapClampMode );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapClampMode );
+	glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapClampMode );
 
-	qglBindTexture( GL_TEXTURE_2D, 0 );	//jfm: i don't know why this is here, but it breaks lightmaps when there's only 1
+	glBindTexture( GL_TEXTURE_2D, 0 );	//jfm: i don't know why this is here, but it breaks lightmaps when there's only 1
 	glState.currenttextures[glState.currenttmu] = 0;	//mark it not bound
 
 	if ( image->TMU == 1 ) {
@@ -1748,7 +1750,7 @@ static void R_CreateFogImage( void ) {
 	borderColor[2] = 1.0;
 	borderColor[3] = 1;
 
-	qglTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
+	glTexParameterfv( GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor );
 }
 
 /*

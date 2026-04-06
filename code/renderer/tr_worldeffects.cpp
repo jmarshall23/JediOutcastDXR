@@ -60,7 +60,7 @@ void MYgluPerspective( GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble 
 	xmin = ymin * aspect;
 	xmax = ymax * aspect;
 
-	qglFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
+	glFrustum( xmin, xmax, ymin, ymax, zNear, zFar );
 }
 
 
@@ -605,31 +605,31 @@ void CMistyFog::Render(CWorldEffectsSystem *system)
 	GL_Bind(mImage);
 	GL_State(GLS_SRCBLEND_SRC_ALPHA|GLS_DSTBLEND_ONE);
 
-//	qglColor4f(1.0, 1.0, 1.0, mAlpha*0.4);
+//	glColor4f(1.0, 1.0, 1.0, mAlpha*0.4);
 
 	if (mSlave)
 	{
-		qglColor4f(1.0, 0.0, 0.0, mAlpha);	
+		glColor4f(1.0, 0.0, 0.0, mAlpha);	
 	}
 	else
 	{
-		qglColor4f(0.0, 1.0, 0.0, mAlpha);	
+		glColor4f(0.0, 1.0, 0.0, mAlpha);	
 	}
 
-	qglBegin(GL_QUADS);
-	qglTexCoord2f(mTextureCoords[0][0], mTextureCoords[0][1]);
-	qglVertex3f(-10, 10, -10);
+	glBegin(GL_QUADS);
+	glTexCoord2f(mTextureCoords[0][0], mTextureCoords[0][1]);
+	glVertex3f(-10, 10, -10);
 
-	qglTexCoord2f(mTextureCoords[1][0], mTextureCoords[0][1]);
-	qglVertex3f(10, 10, -10);
+	glTexCoord2f(mTextureCoords[1][0], mTextureCoords[0][1]);
+	glVertex3f(10, 10, -10);
 
-	qglTexCoord2f(mTextureCoords[1][0], mTextureCoords[1][1]);
-	qglVertex3f(10, -10, -10);
+	glTexCoord2f(mTextureCoords[1][0], mTextureCoords[1][1]);
+	glVertex3f(10, -10, -10);
 
-	qglTexCoord2f(mTextureCoords[0][0], mTextureCoords[1][1]);
-	qglVertex3f(-10, -10, -10);
+	glTexCoord2f(mTextureCoords[0][0], mTextureCoords[1][1]);
+	glVertex3f(-10, -10, -10);
 
-	qglEnd();*/
+	glEnd();*/
 }
 
 void CMistyFog::CreateTextureCoords(void)
@@ -864,47 +864,47 @@ void CMistyFog2::Render(CWorldEffectsSystem *system)
 		return;
 	}
 
-	qglMatrixMode(GL_PROJECTION);
-	qglPushMatrix();
-    qglLoadIdentity ();
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+    glLoadIdentity ();
 	MYgluPerspective (80.0,  1.0,  4,  2048.0);
 
-	qglMatrixMode(GL_MODELVIEW);
-	qglPushMatrix();
-    qglLoadIdentity ();
-    qglRotatef (-90,  1, 0, 0);	    // put Z going up
-    qglRotatef (90,  0, 0, 1);	    // put Z going up
-    qglRotatef (0,  1, 0, 0);
-    qglRotatef (-90,  0, 1, 0);
-    qglRotatef (-90,  0, 0, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+    glLoadIdentity ();
+    glRotatef (-90,  1, 0, 0);	    // put Z going up
+    glRotatef (90,  0, 0, 1);	    // put Z going up
+    glRotatef (0,  1, 0, 0);
+    glRotatef (-90,  0, 1, 0);
+    glRotatef (-90,  0, 0, 1);
 
-	qglDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
 	GL_State(GLS_SRCBLEND_SRC_ALPHA|GLS_DSTBLEND_ONE);
-	qglShadeModel (GL_SMOOTH);
+	glShadeModel (GL_SMOOTH);
 
-	qglColorPointer(4, GL_FLOAT, 0, mColors);
-	qglEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer(4, GL_FLOAT, 0, mColors);
+	glEnableClientState(GL_COLOR_ARRAY);
 
-	qglVertexPointer( 3, GL_FLOAT, 0, mVerts );
-	qglEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer( 3, GL_FLOAT, 0, mVerts );
+	glEnableClientState(GL_VERTEX_ARRAY);
 
-	if (qglLockArraysEXT) 
+	if (glLockArraysEXT) 
 	{
-		qglLockArraysEXT(0, MISTYFOG_HEIGHT*MISTYFOG_WIDTH);
+		glLockArraysEXT(0, MISTYFOG_HEIGHT*MISTYFOG_WIDTH);
 	}
-	qglDrawElements(GL_QUADS, (MISTYFOG_HEIGHT-1)*(MISTYFOG_WIDTH-1)*4, GL_UNSIGNED_INT, mIndexes);
-	if ( qglUnlockArraysEXT ) 
+	glDrawElements(GL_QUADS, (MISTYFOG_HEIGHT-1)*(MISTYFOG_WIDTH-1)*4, GL_UNSIGNED_INT, mIndexes);
+	if ( glUnlockArraysEXT ) 
 	{
-		qglUnlockArraysEXT();
+		glUnlockArraysEXT();
 	}
 
-	qglDisableClientState(GL_COLOR_ARRAY);
-//	qglDisableClientState(GL_VERTEX_ARRAY);	 backend doesn't ever re=enable this properly
+	glDisableClientState(GL_COLOR_ARRAY);
+//	glDisableClientState(GL_VERTEX_ARRAY);	 backend doesn't ever re=enable this properly
 
-	qglPopMatrix();
-	qglMatrixMode(GL_PROJECTION);
-	qglPopMatrix();
-	qglMatrixMode(GL_MODELVIEW);	// bug somewhere in the backend which requires this
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);	// bug somewhere in the backend which requires this
 }
 
 
@@ -1139,83 +1139,83 @@ void CWind::Render(CWorldEffectsSystem *system)
 		return;
 	}
 
-	qglDisable(GL_TEXTURE_2D);
-	qglDisable(GL_CULL_FACE);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_CULL_FACE);
 	GL_State(GLS_ALPHA);
 
-	qglColor4f(1.0, 0.0, 0.0, 0.5);
-	qglBegin(GL_QUADS);
+	glColor4f(1.0, 0.0, 0.0, 0.5);
+	glBegin(GL_QUADS);
 	
 	VectorMA(mPoint, -(mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[1]/2.0), mPlanes[1], output);
 	VectorMA(output, -(mSize[2]/2.0), mPlanes[2], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	VectorMA(mPoint, -(mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, (mSize[1]/2.0), mPlanes[1], output);
 	VectorMA(output, -(mSize[2]/2.0), mPlanes[2], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	VectorMA(mPoint, -(mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, (mSize[1]/2.0), mPlanes[1], output);
 	VectorMA(output, (mSize[2]/2.0), mPlanes[2], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	VectorMA(mPoint, -(mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[1]/2.0), mPlanes[1], output);
 	VectorMA(output, (mSize[2]/2.0), mPlanes[2], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	
 	
-	qglColor4f(0.0, 1.0, 0.0, 0.5);
+	glColor4f(0.0, 1.0, 0.0, 0.5);
 	VectorMA(mPoint, -(mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[1]/2.0), mPlanes[1], output);
 	VectorMA(output, -(mSize[2]/2.0), mPlanes[2], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	VectorMA(mPoint, (mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[1]/2.0), mPlanes[1], output);
 	VectorMA(output, -(mSize[2]/2.0), mPlanes[2], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	VectorMA(mPoint, (mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[1]/2.0), mPlanes[1], output);
 	VectorMA(output, (mSize[2]/2.0), mPlanes[2], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	VectorMA(mPoint, -(mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[1]/2.0), mPlanes[1], output);
 	VectorMA(output, (mSize[2]/2.0), mPlanes[2], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 	
 
-	qglColor4f(0.0, 0.0, 1.0, 0.5);
+	glColor4f(0.0, 0.0, 1.0, 0.5);
 	VectorMA(mPoint, -(mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[2]/2.0), mPlanes[2], output);
 	VectorMA(output, -(mSize[1]/2.0), mPlanes[1], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	VectorMA(mPoint, (mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[2]/2.0), mPlanes[2], output);
 	VectorMA(output, -(mSize[1]/2.0), mPlanes[1], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	VectorMA(mPoint, (mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[2]/2.0), mPlanes[2], output);
 	VectorMA(output, (mSize[1]/2.0), mPlanes[1], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 
 	VectorMA(mPoint, -(mSize[0]/2.0), mPlanes[0], output);
 	VectorMA(output, -(mSize[2]/2.0), mPlanes[2], output);
 	VectorMA(output, (mSize[1]/2.0), mPlanes[1], output);
-	qglVertex3fv(output);
+	glVertex3fv(output);
 	
 	
-	qglEnd();
+	glEnd();
 
-	qglEnable(GL_CULL_FACE);
-	qglEnable(GL_TEXTURE_2D);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_TEXTURE_2D);
 }
 
 
@@ -1735,37 +1735,37 @@ void CSnowSystem::Render(void)
 
 	VectorAdd(backEnd.viewParms.or.origin, mMinSpread, origin);
 
-	qglColor4f(0.8f, 0.8f, 0.8f, mAlpha);
+	glColor4f(0.8f, 0.8f, 0.8f, mAlpha);
 
 //	GL_State(GLS_SRCBLEND_SRC_ALPHA|GLS_DSTBLEND_ONE);
 	GL_State(GLS_ALPHA);
-	qglDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
 
-	if (qglPointParameterfEXT)
+	if (glPointParameterfEXT)
 	{
-		qglPointSize(10.0);
-		qglPointParameterfEXT(GL_POINT_SIZE_MIN_EXT, 1.0);
-		qglPointParameterfEXT(GL_POINT_SIZE_MAX_EXT, 4.0);
-	//	qglPointParameterfEXT(GL_POINT_FADE_THRESHOLD_SIZE_EXT, 3.0);
-		qglPointParameterfvEXT(GL_DISTANCE_ATTENUATION_EXT, (float *)attenuation);
+		glPointSize(10.0);
+		glPointParameterfEXT(GL_POINT_SIZE_MIN_EXT, 1.0);
+		glPointParameterfEXT(GL_POINT_SIZE_MAX_EXT, 4.0);
+	//	glPointParameterfEXT(GL_POINT_FADE_THRESHOLD_SIZE_EXT, 3.0);
+		glPointParameterfvEXT(GL_DISTANCE_ATTENUATION_EXT, (float *)attenuation);
 	}
 	else
 	{
-		qglPointSize(2.0);
+		glPointSize(2.0);
 	}
 
 	item = mSnowList;
-	qglBegin(GL_POINTS);
+	glBegin(GL_POINTS);
 	for(i=mMaxSnowflakes;i;i--)
 	{
 		if (item->flags & PARTICLE_FLAG_RENDER)
 		{
-			qglVertex3fv(item->pos);
+			glVertex3fv(item->pos);
 		}
 		item++;
 	}
-	qglEnd();
-	qglEnable(GL_TEXTURE_2D);
+	glEnd();
+	glEnable(GL_TEXTURE_2D);
 }
 
 CSnowSystem	*snowSystem = 0;
@@ -1844,8 +1844,8 @@ CRainSystem::CRainSystem(int maxRain) :
 
 	mImage = R_CreateImage(name, data, width, height, false, false, false, GL_CLAMP);
 	GL_Bind(mImage);
-	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-	qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 
 	Init();
 }
@@ -2077,15 +2077,15 @@ void CRainSystem::Render(void)
 	GL_Bind(mImage);
 
 	GL_State(GLS_ALPHA);
-	qglEnable(GL_TEXTURE_2D);
-	qglDisable(GL_CULL_FACE);
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_CULL_FACE);
 
-	qglMatrixMode(GL_MODELVIEW);
-	qglPushMatrix();
-    qglTranslatef (backEnd.viewParms.or.origin[0], backEnd.viewParms.or.origin[1],  backEnd.viewParms.or.origin[2]);
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+    glTranslatef (backEnd.viewParms.or.origin[0], backEnd.viewParms.or.origin[1],  backEnd.viewParms.or.origin[2]);
 
 	item = mRainList;
-	qglBegin(GL_TRIANGLES );
+	glBegin(GL_TRIANGLES );
 	for(i=mMaxRain;i;i--)
 	{
 /*		percent = (item->pos[1] -(-20.0)) / (20.0 - (-20.0));
@@ -2108,11 +2108,11 @@ void CRainSystem::Render(void)
 			{
 				alpha = mAlpha;
 			}
-			qglColor4f(1.0, 1.0, 1.0, alpha * mFadeAlpha);
+			glColor4f(1.0, 1.0, 1.0, alpha * mFadeAlpha);
 		}
 		else
 		{
-			qglColor4f(1.0, 1.0, 1.0, mAlpha * mFadeAlpha);
+			glColor4f(1.0, 1.0, 1.0, mAlpha * mFadeAlpha);
 //			radius *= 1.0 + (item->pos[2] / 20.0);
 		}
 
@@ -2120,27 +2120,27 @@ void CRainSystem::Render(void)
 		pos[1] = cos(item->pos[0]) * radius + (item->pos[2] * mWindDirection[1] * mWindAngle);
 		pos[2] = item->pos[2];
 
-		qglTexCoord2f(1.0, 0.0);
-		qglVertex3f(pos[0],
+		glTexCoord2f(1.0, 0.0);
+		glVertex3f(pos[0],
 					pos[1],
 					pos[2]);
 
-		qglTexCoord2f(0.0, 0.0);
-		qglVertex3f(pos[0] + left[0],
+		glTexCoord2f(0.0, 0.0);
+		glVertex3f(pos[0] + left[0],
 					pos[1] + left[1],
 					pos[2] + left[2]);
 		
-		qglTexCoord2f(0.0, 1.0);
-		qglVertex3f(pos[0] + down[0] + left[0],
+		glTexCoord2f(0.0, 1.0);
+		glVertex3f(pos[0] + down[0] + left[0],
 					pos[1] + down[1] + left[1],
 					pos[2] + down[2] + left[2]);
 		item++;
 	}
-	qglEnd();
+	glEnd();
 
-	qglEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 
-	qglPopMatrix();
+	glPopMatrix();
 }
 
 
@@ -2190,9 +2190,9 @@ void RB_RenderWorldEffects(void)
 	}
 
 	SetViewportAndScissor();
-	qglMatrixMode(GL_MODELVIEW);
-//	qglPushMatrix();
-	qglLoadMatrixf( backEnd.viewParms.world.modelMatrix );
+	glMatrixMode(GL_MODELVIEW);
+//	glPushMatrix();
+	glLoadMatrixf( backEnd.viewParms.world.modelMatrix );
 
 	originContents = ri.CM_PointContents(backEnd.viewParms.or.origin, 0);
 
@@ -2208,8 +2208,8 @@ void RB_RenderWorldEffects(void)
 		snowSystem->Render();
 	}
 
-//	qglMatrixMode(GL_MODELVIEW);
-//	qglPopMatrix();
+//	glMatrixMode(GL_MODELVIEW);
+//	glPopMatrix();
 }
 
 //	console commands for r_we

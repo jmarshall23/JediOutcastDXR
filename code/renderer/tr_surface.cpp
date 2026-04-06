@@ -1083,23 +1083,23 @@ void RB_SurfaceBeam( void )
 	switch(e->skinNum)
 	{
 	case 1://Green
-		qglColor3f( 0, 1, 0 );
+		glColor3f( 0, 1, 0 );
 		break;
 	case 2://Blue
-		qglColor3f( 0.5, 0.5, 1 );
+		glColor3f( 0.5, 0.5, 1 );
 		break;
 	case 0://red
 	default:
-		qglColor3f( 1, 0, 0 );
+		glColor3f( 1, 0, 0 );
 		break;
 	}
 
-	qglBegin( GL_TRIANGLE_STRIP );
+	glBegin( GL_TRIANGLE_STRIP );
 	for ( i = 0; i <= NUM_BEAM_SEGS; i++ ) {
-		qglVertex3fv( start_points[ i % NUM_BEAM_SEGS] );
-		qglVertex3fv( end_points[ i % NUM_BEAM_SEGS] );
+		glVertex3fv( start_points[ i % NUM_BEAM_SEGS] );
+		glVertex3fv( end_points[ i % NUM_BEAM_SEGS] );
 	}
-	qglEnd();
+	glEnd();
 }
 
 
@@ -1905,19 +1905,19 @@ Draws x/y/z lines from the origin for orientation debugging
 */
 void RB_SurfaceAxis( void ) {
 	GL_Bind( tr.whiteImage );
-	qglLineWidth( 3 );
-	qglBegin( GL_LINES );
-	qglColor3f( 1,0,0 );
-	qglVertex3f( 0,0,0 );
-	qglVertex3f( 16,0,0 );
-	qglColor3f( 0,1,0 );
-	qglVertex3f( 0,0,0 );
-	qglVertex3f( 0,16,0 );
-	qglColor3f( 0,0,1 );
-	qglVertex3f( 0,0,0 );
-	qglVertex3f( 0,0,16 );
-	qglEnd();
-	qglLineWidth( 1 );
+//	glLineWidth( 3 );
+	glBegin( GL_LINES );
+	glColor3f( 1,0,0 );
+	glVertex3f( 0,0,0 );
+	glVertex3f( 16,0,0 );
+	glColor3f( 0,1,0 );
+	glVertex3f( 0,0,0 );
+	glVertex3f( 0,16,0 );
+	glColor3f( 0,0,1 );
+	glVertex3f( 0,0,0 );
+	glVertex3f( 0,0,16 );
+	glEnd();
+//	glLineWidth( 1 );
 }
 
 //===========================================================================
@@ -2010,7 +2010,7 @@ qboolean RB_TestZFlare( vec3_t point, vec3_t color, vec3_t normal) {
 	glState.finishCalled = qfalse;
 
 	// read back the z buffer contents
-	qglReadPixels( backEnd.viewParms.viewportX + window[0],backEnd.viewParms.viewportY + window[1], 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth );
+	glReadPixels( backEnd.viewParms.viewportX + window[0],backEnd.viewParms.viewportY + window[1], 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth );
 
 	screenZ = backEnd.viewParms.projectionMatrix[14] / 
 		( ( 2*depth - 1 ) * backEnd.viewParms.projectionMatrix[11] - backEnd.viewParms.projectionMatrix[10] );
@@ -2072,7 +2072,7 @@ void RB_SurfaceFlare( srfFlare_t *surf ) {
 void RB_SurfaceDisplayList( srfDisplayList_t *surf ) {
 	// all apropriate state must be set in RB_BeginSurface
 	// this isn't implemented yet...
-	qglCallList( surf->listNum );
+	//glCallList( surf->listNum );
 }
 
 void RB_SurfaceSkip( void *surf ) {
